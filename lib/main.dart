@@ -1,7 +1,19 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:wear/wear.dart';
+import 'package:wears/heart_rate.dart';
+import 'package:wears/login_screens.dart';
+import 'package:wears/provider/user_provider.dart';
 import 'package:workout/workout.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -70,68 +82,41 @@ class _MyAppState extends State<MyApp> {
   }
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
-          primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => UserProvider(),
         ),
-        home: Scaffold(
-          body: Center(
-            child: Column(
-              children: [
-                const Spacer(),
-                Text('Heart rate: $heartRate'),
-                Text('Calories: ${calories.toStringAsFixed(2)}'),
-                Text('Steps: $steps'),
-                Text('Distance: ${distance.toStringAsFixed(2)}'),
-                Text('Speed: ${speed.toStringAsFixed(2)}'),
-                const Spacer(),
-                TextButton(
-                  onPressed: toggleExerciseState,
-                  child: Text(started ? 'Stop' : 'Start'),
-                ),
-              ],
-            ),
-          ),
-        ));
-  }
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Aplikasi Ujikompetensi',
+        home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.active) {
+              // Checking if the snapshot has any data or not
+              if (snapshot.hasData) {
+                // if snapshot has data which means user is logged in then we check the width of screen and accordingly display the screen layout
+                return const HeartRate();
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text('${snapshot.error}'),
+                );
+              }
+            }
 
-  void toggleExerciseState() async {
-    setState(() {
-      started = !started;
-    });
+            // means connection to future hasnt been made yet
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
 
-    if (started) {
-      final supportedExerciseTypes = await workout.getSupportedExerciseTypes();
-      // ignore: avoid_print
-      print('Supported exercise types: ${supportedExerciseTypes.length}');
-
-      final result = await workout.start(
-        // In a real application, check the supported exercise types first
-        exerciseType: exerciseType,
-        features: features,
-        enableGps: enableGps,
-      );
-
-      if (result.unsupportedFeatures.isNotEmpty) {
-        // ignore: avoid_print
-        print('Unsupported features: ${result.unsupportedFeatures}');
-        // In a real application, update the UI to match
-      } else {
-        // ignore: avoid_print
-        print('All requested features supported');
-      }
-    } else {
-      await workout.stop();
-    }
+            return LoginScreens();
+          },
+        ),
+      ),
+    );
   }
 }
