@@ -1,7 +1,12 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:wear/wear.dart';
+import 'package:wears/model/user_model.dart';
 import 'package:workout/workout.dart';
 
 class HeartRate extends StatefulWidget {
@@ -12,6 +17,32 @@ class HeartRate extends StatefulWidget {
 }
 
 class _HeartRateState extends State<HeartRate> {
+  Timer? timer;
+  @override
+  void initState() {
+    // TODO: implement initState
+    timer = Timer.periodic(
+        Duration(seconds: 1), (Timer t) => checkForNewSharedLists());
+
+    super.initState();
+  }
+
+  void checkForNewSharedLists() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    DocumentSnapshot userData = await FirebaseFirestore.instance
+        .collection('akun')
+        .doc(user!.uid)
+        .get();
+    UserModel userModel = UserModel.fromSnap(userData);
+    await FirebaseFirestore.instance
+        .collection('akun')
+        .doc(userModel.uid)
+        .update({
+      'heartRate': heartRate,
+    });
+  }
+
   final workout = Workout();
 
   final exerciseType = ExerciseType.walking;
@@ -65,6 +96,7 @@ class _HeartRateState extends State<HeartRate> {
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return WatchShape(

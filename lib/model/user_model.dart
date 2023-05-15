@@ -5,7 +5,7 @@ class UserModel {
   final String email;
   final String tujuan;
   final String kelamin;
-  final int heartRate;
+  final double heartRate;
   final String tanggalLahir;
   final String tinggkatAktivitas;
   final String beratBadan;
