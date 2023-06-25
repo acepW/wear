@@ -36,6 +36,9 @@ class _LoginScreensState extends State<LoginScreens> {
     FocusScope.of(context).unfocus();
 
     try {
+      setState(() {
+        _isLoading = true;
+      });
       await authInstance.signInWithEmailAndPassword(
           email: _emailTextController.text.toLowerCase().trim(),
           password: _passTextController.text.trim());
@@ -123,7 +126,7 @@ class _LoginScreensState extends State<LoginScreens> {
                         TextFormField(
                           textInputAction: TextInputAction.done,
                           onEditingComplete: () {
-                            // _submitFormOnLogin();
+                            _submitFormOnLogin();
                           },
                           controller: _passTextController,
                           focusNode: _passFocusNode,
@@ -171,31 +174,6 @@ class _LoginScreensState extends State<LoginScreens> {
                                       color: Colors.black,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500))),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                  onPressed: () {
-                                    // Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (context) =>
-                                    //             ForgetPasswordScreen()));
-                                  },
-                                  child: Text("Lupa Password?",
-                                      style: GoogleFonts.poppins(
-                                          textStyle: const TextStyle(
-                                              color: Colors.green,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w500)))),
-                            ],
-                          ),
                         ),
                         const SizedBox(
                           height: 5,

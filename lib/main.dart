@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:wear/wear.dart';
+
 import 'package:wears/heart_rate.dart';
 import 'package:wears/login_screens.dart';
 import 'package:wears/provider/user_provider.dart';

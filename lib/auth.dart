@@ -22,53 +22,6 @@ class AuthMethods {
 
   // Signing Up User
 
-  Future<String> signUpUser(
-      {required Timestamp createdAt,
-      required String email,
-      required String password,
-      required String tujuan,
-      required String kelamin,
-      required String tanggalLahir,
-      required String aktivitas,
-      required String beratBadan,
-      required String tinggiBadan}) async {
-    String res = "Some error Occurred";
-    try {
-      if (email != null && email.isNotEmpty) {
-        // registering user in auth with email and password
-        UserCredential cred = await _auth.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-
-        model.UserModel _user = model.UserModel(
-            createdAt: Timestamp.now(),
-            uid: cred.user!.uid,
-            email: email,
-            beratBadan: beratBadan,
-            kelamin: kelamin,
-            heartRate: 0,
-            tanggalLahir: tanggalLahir,
-            tinggiBadan: tinggiBadan,
-            tinggkatAktivitas: aktivitas,
-            tujuan: tujuan);
-
-        // adding user in our database
-        await _firestore
-            .collection("akun")
-            .doc(cred.user!.uid)
-            .set(_user.toJson());
-
-        res = "success";
-      } else {
-        res = "Maaf tidak ada yang boleh kosong";
-      }
-    } catch (err) {
-      return err.toString();
-    }
-    return res;
-  }
-
   // logging in user
   Future<String> loginUser({
     required String email,

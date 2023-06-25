@@ -5,9 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wear/wear.dart';
+import 'package:wears/auth.dart';
+import 'package:wears/login_screens.dart';
 import 'package:wears/model/user_model.dart';
 import 'package:workout/workout.dart';
+import 'package:intl/intl.dart';
 
 class HeartRate extends StatefulWidget {
   const HeartRate({super.key});
@@ -18,6 +22,7 @@ class HeartRate extends StatefulWidget {
 
 class _HeartRateState extends State<HeartRate> {
   Timer? timer;
+  bool _isLoading = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -28,19 +33,10 @@ class _HeartRateState extends State<HeartRate> {
   }
 
   void checkForNewSharedLists() async {
-    User? user = FirebaseAuth.instance.currentUser;
-
-    DocumentSnapshot userData = await FirebaseFirestore.instance
-        .collection('akun')
-        .doc(user!.uid)
-        .get();
-    UserModel userModel = UserModel.fromSnap(userData);
     await FirebaseFirestore.instance
         .collection('akun')
-        .doc(userModel.uid)
-        .update({
-      'heartRate': heartRate,
-    });
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'heartRate': heartRate, 'kalori': calories});
   }
 
   final workout = Workout();
@@ -105,26 +101,173 @@ class _HeartRateState extends State<HeartRate> {
           builder: (context, mode, child) => child!,
           child: Scaffold(
             body: Center(
-              child: Column(
-                children: [
-                  const Spacer(),
-                  Text('Heart rate: $heartRate'),
-                  Text('Calories: ${calories.toStringAsFixed(2)}'),
-                  Text('Steps: $steps'),
-                  Text('Distance: ${distance.toStringAsFixed(2)}'),
-                  Text('Speed: ${speed.toStringAsFixed(2)}'),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: toggleExerciseState,
-                    child: Text(started ? 'Stop' : 'Start'),
-                  ),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 30,
+                          ),
+                          Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 70,
+                                  child: Column(
+                                    children: [
+                                      Text('Heart rate'),
+                                      Text(' $heartRate'),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                Container(
+                                  width: 70,
+                                  child: Column(
+                                    children: [
+                                      Text('Calories'),
+                                      Text(' ${calories.toStringAsFixed(2)}'),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 70,
+                                  child: Column(
+                                    children: [
+                                      Text('Steps'),
+                                      Text(' $steps'),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                Container(
+                                  width: 70,
+                                  child: Column(
+                                    children: [
+                                      Text('Speed'),
+                                      Text('${speed.toStringAsFixed(2)}'),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 70,
+                            child: Column(
+                              children: [
+                                Text('Distance'),
+                                Text('${distance.toStringAsFixed(2)}'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    InkWell(
+                      onTap: toggleExerciseState,
+                      child: Text(started ? 'Stop' : 'Start',
+                          style: TextStyle(
+                              color: started ? Colors.red : Colors.green)),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        try {
+                          FirebaseAuth.instance.signOut();
+
+                          // ignore: use_build_context_synchronously
+
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                            builder: (context) => LoginScreens(),
+                          ));
+
+                          print('Successfully logout');
+                        } on FirebaseException catch (error) {
+                          showSnackBar(context, "${error.message}");
+
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        } catch (error) {
+                          showSnackBar(context, "$error");
+
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        } finally {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
+                      child: Text(
+                        'Logout',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         );
       },
     );
+  }
+
+  void uploadCalori() {
+    DateTime tsdate = DateTime.now();
+    String date = DateFormat.yMd().format(tsdate);
+    String time = DateFormat.jm().format(tsdate);
+    var uuid = Uuid();
+    var id = uuid.v4();
+
+    try {
+      FirebaseFirestore.instance
+          .collection("akun")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection("calori")
+          .doc(id)
+          .set({'uid': id, 'date': date, 'time': time, 'calori': calories});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("error"),
+      ));
+    }
   }
 
   void toggleExerciseState() async {
@@ -154,6 +297,7 @@ class _HeartRateState extends State<HeartRate> {
       }
     } else {
       await workout.stop();
+      uploadCalori();
     }
   }
 }
