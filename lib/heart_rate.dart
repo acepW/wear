@@ -7,9 +7,8 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wear/wear.dart';
-import 'package:wears/auth.dart';
+
 import 'package:wears/login_screens.dart';
-import 'package:wears/model/user_model.dart';
 import 'package:workout/workout.dart';
 import 'package:intl/intl.dart';
 
@@ -28,6 +27,19 @@ class _HeartRateState extends State<HeartRate> {
     // TODO: implement initState
     timer = Timer.periodic(
         Duration(seconds: 1), (Timer t) => checkForNewSharedLists());
+         timer = Timer.periodic(
+        Duration(seconds: 1), (Timer t) => UploadCalPagi());
+         timer = Timer.periodic(
+        Duration(seconds: 1), (Timer t) => UploadCalSiang());
+         timer = Timer.periodic(
+        Duration(seconds: 1), (Timer t) => UploadCalMalam());
+       print(DateFormat.jm().format(DateTime.now()));
+    toggleExerciseState();
+    if (DateFormat.jm().format(DateTime.now()) == "11:55 PM") {
+      started = false;
+    } else if (DateFormat.jm().format(DateTime.now()) == "11:58 PM") {
+      started = true;
+    }
 
     super.initState();
   }
@@ -37,6 +49,45 @@ class _HeartRateState extends State<HeartRate> {
         .collection('akun')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .update({'heartRate': heartRate, 'kalori': calories});
+  }
+
+    void UploadCalPagi()  {
+       if (DateFormat.jm().format(DateTime.now()) == "09:30 PM"){
+         FirebaseFirestore.instance
+        .collection('akun')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'kaloriPagi': calories.toStringAsFixed(0)});
+       }
+    
+  }
+   void UploadCalSiang()  {
+       if (DateFormat.jm().format(DateTime.now()) == "12:00 PM"){
+         FirebaseFirestore.instance
+        .collection('akun')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'kaloriSiang': calories.toStringAsFixed(0)});
+       }
+    
+  }
+
+   void UploadCalMalam()  {
+        if (DateFormat.jm().format(DateTime.now()) == "08:00 PM"){
+         FirebaseFirestore.instance
+        .collection('akun')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'kaloriMalam': calories.toStringAsFixed(0)});
+       }
+    
+  }
+
+
+  void defaultKal()async{
+     if (DateFormat.jm().format(DateTime.now()) == "11:50 PM"){
+        await FirebaseFirestore.instance
+        .collection('akun')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'kaloriMalam': 0,"kaloriSiang": 0,"kaloriPagi":0});
+       }
   }
 
   final workout = Workout();
@@ -56,7 +107,7 @@ class _HeartRateState extends State<HeartRate> {
   double steps = 0;
   double distance = 0;
   double speed = 0;
-  bool started = false;
+  bool started = true;
   _HeartRateState() {
     workout.stream.listen((event) {
       // ignore: avoid_print
@@ -194,19 +245,23 @@ class _HeartRateState extends State<HeartRate> {
                     SizedBox(
                       height: 5,
                     ),
-                    InkWell(
-                      onTap: toggleExerciseState,
-                      child: Text(started ? 'Stop' : 'Start',
-                          style: TextStyle(
-                              color: started ? Colors.red : Colors.green)),
-                    ),
+                    // InkWell(
+                    //   onTap: toggleExerciseState,
+                    //   child: Text(started ? 'Stop' : 'Start',
+                    //       style: TextStyle(
+                    //           color: started ? Colors.red : Colors.green)),
+                    // ),
                     SizedBox(
                       height: 10,
                     ),
                     InkWell(
-                      onTap: () {
+                      onTap: () async{
                         try {
-                          FirebaseAuth.instance.signOut();
+                          await FirebaseAuth.instance.signOut();
+
+                         setState(() {
+                           started = false;
+                         });
 
                           // ignore: use_build_context_synchronously
 
@@ -271,10 +326,6 @@ class _HeartRateState extends State<HeartRate> {
   }
 
   void toggleExerciseState() async {
-    setState(() {
-      started = !started;
-    });
-
     if (started) {
       final supportedExerciseTypes = await workout.getSupportedExerciseTypes();
       // ignore: avoid_print

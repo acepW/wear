@@ -97,28 +97,21 @@ class _LoginScreensState extends State<LoginScreens> {
                               return null;
                             }
                           },
-                          style: GoogleFonts.rubik(
-                              textStyle: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500)),
+                         
                           decoration: InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    width: 1, color: Colors.green),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    width: 1, color: Colors.green),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              hintText: "Email",
-                              hintStyle: GoogleFonts.rubik(
-                                  textStyle: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500))),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  width: 1, color: Colors.green),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  width: 1, color: Colors.green),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            hintText: "Email",
+                           
+                          ),
                         ),
                         const SizedBox(
                           height: 15,
@@ -139,11 +132,7 @@ class _LoginScreensState extends State<LoginScreens> {
                               return null;
                             }
                           },
-                          style: GoogleFonts.rubik(
-                              textStyle: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500)),
+                          
                           decoration: InputDecoration(
                               suffixIcon: GestureDetector(
                                 onTap: () {
@@ -169,11 +158,7 @@ class _LoginScreensState extends State<LoginScreens> {
                                 borderRadius: BorderRadius.circular(15),
                               ),
                               hintText: "Password",
-                              hintStyle: GoogleFonts.rubik(
-                                  textStyle: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500))),
+                             ),
                         ),
                         const SizedBox(
                           height: 5,
@@ -195,11 +180,7 @@ class _LoginScreensState extends State<LoginScreens> {
                                     )
                                   : Text(
                                       "Login",
-                                      style: GoogleFonts.rubik(
-                                          textStyle: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w500)),
+                                     
                                     ),
                             ),
                           ),
