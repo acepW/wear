@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.wear">
+    <uses-permission android:minSdkVersion="34" android:name="android.permission.USE_EXACT_ALARM" />
     <!-- Required for heart rate -->
 <uses-permission android:name="android.permission.BODY_SENSORS" />
 <!-- Required for calories, steps, distance, speed -->
@@ -7,6 +9,7 @@
 <!-- Required to use location to estimate distance, speed -->
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    <application
+   tools:replace="android:label"
         android:label="wear"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
